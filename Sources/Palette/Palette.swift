@@ -56,6 +56,56 @@ public final class Palette {
         }
     }
     
+    /// Create a Palette instance safely, returning nil if initialization fails
+    /// - Parameters:
+    ///   - fileName: The name of the JSON file (without extension)
+    ///   - defaultName: Optional default theme name to use if no saved theme exists
+    ///   - bundle: The bundle to load the file from (defaults to .main)
+    /// - Returns: A Palette instance if successful, nil otherwise
+    public static func create(from fileName: String, defaultName: String? = nil, bundle: Bundle = .main) -> Palette? {
+        do {
+            return try Palette(from: fileName, defaultName: defaultName, bundle: bundle)
+        } catch {
+            print("Failed to create Palette: \(error)")
+            return nil
+        }
+    }
+    
+    /// Create a Palette with a default theme as fallback
+    /// - Parameters:
+    ///   - fileName: The name of the JSON file (without extension)
+    ///   - defaultName: Optional default theme name to use if no saved theme exists
+    ///   - bundle: The bundle to load the file from (defaults to .main)
+    /// - Returns: A Palette instance with fallback theme if file loading fails
+    public static func createWithFallback(from fileName: String, defaultName: String? = nil, bundle: Bundle = .main) -> Palette {
+        if let palette = create(from: fileName, defaultName: defaultName, bundle: bundle) {
+            return palette
+        } else {
+            // Create a fallback palette with basic colors
+            let fallbackTheme = Theme(
+                name: "Fallback",
+                colors: [
+                    "primary": .blue,
+                    "secondary": .gray,
+                    "background": .white,
+                    "text": .black,
+                    "accent": .red
+                ]
+            )
+            return Palette(themes: [fallbackTheme], defaultTheme: fallbackTheme)
+        }
+    }
+    
+    /// Initialize Palette with existing themes (for fallback scenarios)
+    /// - Parameters:
+    ///   - themes: Array of themes to use
+    ///   - defaultTheme: The default theme to use
+    private init(themes: [Theme], defaultTheme: Theme) {
+        self.themes = themes
+        self.theme = defaultTheme
+        self.defaultThemeName = defaultTheme.name
+    }
+    
     /// Set the active theme
     /// - Parameter theme: The theme to set as active
     /// - Throws: PaletteError.themeNotFound if the theme is not in the available themes
