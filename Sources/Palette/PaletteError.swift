@@ -5,6 +5,8 @@
 //  Created by Michael Tibollo on 2025-09-12.
 //
 
+import Foundation
+
 public enum PaletteError: Error, LocalizedError {
     
     case fileNotFound(String)

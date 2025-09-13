@@ -36,7 +36,7 @@ public final class Palette {
         
         // Validate themes
         for theme in themes {
-            try validateTheme(theme)
+            try Palette.validateTheme(theme)
         }
         
         self.themes = themes

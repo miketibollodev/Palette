@@ -177,18 +177,6 @@ private struct MockThemeData {
 // MARK: - ThemeLoader Tests
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
-@Test func testThemeLoaderWithValidData() async throws {
-    // Create a temporary bundle with test data
-    let bundle = Bundle.module
-    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("test_themes.json")
-    
-    try MockThemeData.validJSON.write(to: tempURL)
-    
-    // Note: This test would need a proper bundle setup to work
-    // For now, we'll test the error cases that don't require file I/O
-}
-
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
 @Test func testThemeLoaderFileNotFound() async throws {
     do {
         _ = try ThemeLoader.loadThemes(fileName: "nonexistent", bundle: .main)
@@ -198,34 +186,6 @@ private struct MockThemeData {
     } catch {
         #expect(Bool(false), "Should have thrown PaletteError.fileNotFound")
     }
-}
-
-// MARK: - Palette Tests
-
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
-@Test func testPaletteInitialization() async throws {
-    // Create test themes
-    let themes = [
-        Theme(name: "Light", colors: ["primary": Color.red]),
-        Theme(name: "Dark", colors: ["primary": Color.blue])
-    ]
-    
-    // Test theme validation
-    for theme in themes {
-        do {
-            try Palette.validateThemeFile("test") // This will fail due to file not found
-        } catch {
-            // Expected - we're testing the validation method exists
-        }
-    }
-}
-
-@available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
-@Test func testPaletteThemeValidation() async throws {
-    // Test valid theme
-    let validTheme = Theme(name: "Valid", colors: ["primary": Color.red])
-    // Note: We can't directly test the private validateTheme method,
-    // but we can test through the public API when we have file loading
 }
 
 // MARK: - Integration Tests
