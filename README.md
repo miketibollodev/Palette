@@ -70,7 +70,7 @@ import Palette
 
 @main
 struct MyApp: App {
-    @State private var palette: Palette
+    @State private var palette: Palette = Palette.createWithFallback(from: "themes", defaultName: "Light")
     
     var body: some Scene {
         WindowGroup {
@@ -79,18 +79,6 @@ struct MyApp: App {
                 .task {
                     await loadThemes()
                 }
-        }
-    }
-    
-    init() {
-        // Initialize with fallback theme immediately
-        _palette = State(initialValue: Palette.createWithFallback(from: "themes", defaultName: "Light"))
-    }
-    
-    private func loadThemes() async {
-        // Try to load the real themes, but keep fallback if it fails
-        if let realPalette = Palette.create(from: "themes", defaultName: "Light") {
-            palette = realPalette
         }
     }
 }
@@ -166,17 +154,15 @@ struct MyApp: App {
 ```swift
 @main
 struct MyApp: App {
-    @State private var palette: Palette
-    
-    init() {
-        // Create with fallback - always works
-        _palette = State(initialValue: Palette.createWithFallback(from: "themes", defaultName: "Light"))
-    }
+    @State private var palette: Palette = Palette.createWithFallback(from: "themes", defaultName: "Light")
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(palette)
+                .task {
+                    await loadThemes()
+                }
         }
     }
 }
@@ -474,103 +460,6 @@ struct ThemeErrorView: View {
         } catch {
             errorMessage = "Unexpected error: \(error.localizedDescription)"
         }
-    }
-}
-```
-
-## SwiftUI Best Practices
-
-### 1. Use @State at App Level for Theme Management
-
-```swift
-// Use @State at the app level for simple theme management
-@main
-struct MyApp: App {
-    @State private var palette: Palette?
-    
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environment(palette)
-                .task {
-                    await loadThemes()
-                }
-        }
-    }
-    
-    private func loadThemes() async {
-        palette = Palette.create(from: "themes", defaultName: "Light")
-    }
-}
-```
-
-### 2. Create Reusable Themed Components
-
-```swift
-struct ThemedCard<Content: View>: View {
-    let content: Content
-    @Environment(Palette.self) private var palette
-    
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
-    }
-    
-    var body: some View {
-        content
-            .padding()
-            .background(palette?.theme.background.opacity(0.1))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(palette?.theme.primary.opacity(0.3), lineWidth: 1)
-            )
-            .cornerRadius(8)
-    }
-}
-```
-
-### 3. Handle Theme Loading States
-
-```swift
-struct ThemeLoadingView: View {
-    @Environment(Palette.self) private var palette
-    
-    var body: some View {
-        Group {
-            if palette == nil {
-                ProgressView("Loading themes...")
-                    .foregroundColor(.secondary)
-            } else {
-                ContentView()
-            }
-        }
-    }
-}
-```
-
-### 4. Safe Color Access Patterns
-
-```swift
-struct SafeThemedView: View {
-    @Environment(Palette.self) private var palette
-    
-    var body: some View {
-        VStack {
-            Text("Hello, World!")
-                .foregroundColor(palette?.theme.primary ?? .primary)
-                .background(palette?.theme.background ?? .background)
-            
-            // Or use a fallback color system
-            Text("Secondary Text")
-                .foregroundColor(primaryColor)
-        }
-    }
-    
-    private var primaryColor: Color {
-        palette?.theme.primary ?? .blue
-    }
-    
-    private var backgroundColor: Color {
-        palette?.theme.background ?? .white
     }
 }
 ```
